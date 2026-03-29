@@ -11,9 +11,10 @@ interface UseTablesWSOptions {
     onError?: (data: any) => void;
 }
 
-const WS_BASE_URL = (import.meta.env.VITE_BASE_URL || "")
-  .replace(/^http/, "ws") // http(s)를 ws(s)로 변환
-  .replace(/\/$/, "");    // 맨 뒤 슬래시 제거
+// 🚨 [핵심 수정] Vite 개발 환경에서는 프록시를 타기 위해 현재 host를 사용하고, 빌드(운영) 환경에서는 환경 변수를 사용합니다.
+const WS_BASE_URL = import.meta.env.DEV
+  ? `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}`
+  : (import.meta.env.VITE_BASE_URL || "").replace(/^http/, "ws").replace(/\/$/, "");
 
 export const useTablesWS = (options: UseTablesWSOptions = {}) => {
     const wsRef = useRef<WebSocket | null>(null);
@@ -23,12 +24,8 @@ export const useTablesWS = (options: UseTablesWSOptions = {}) => {
         let isMounted = true;
 
         const connect = () => {
-            // 1. 토큰 가져오기 (CORS 환경에서 쿠키가 전송되지 않을 때를 대비한 쿼리스트링 방식)
-            const token = localStorage.getItem('accessToken') || "";
-            
-            // 2. URL 설정 (토큰 포함)
-            // 🚨 만약 이 주소로도 안 되면, 중간에 v3를 넣어서 테스트 해보세요! (/ws/v3/django/...)
-            const wsUrl = `${WS_BASE_URL}/ws/django/booth/tables/?token=${token}`;
+            // URL 설정 (개발 환경 프록시를 통해 쿠키가 자동으로 전송됩니다.)
+            const wsUrl = `${WS_BASE_URL}/ws/django/booth/tables/`;
             
             console.log(`[WS:Tables] 🔄 연결 시도 중... URL: ${wsUrl}`);
 
@@ -74,22 +71,20 @@ export const useTablesWS = (options: UseTablesWSOptions = {}) => {
             };
 
             socket.onclose = (event) => {
-                // 1006 에러 등의 경우 디버깅을 위해 코드와 이유, 정상 종료 여부를 상세히 출력
                 console.log(
                     `[WS:Tables] ⚪ 연결 종료. Code: ${event.code}, Reason: '${event.reason || "없음"}', Clean: ${event.wasClean}`
                 );
 
-                // 4001(인증 실패)가 아니면 3초 후 자동 재연결 시도
                 if (isMounted && event.code !== 4001) {
                     console.log("[WS:Tables] ⏳ 3초 후 재연결을 시도합니다...");
                     reconnectTimeoutRef.current = window.setTimeout(connect, 3000);
                 } else if (event.code === 4001) {
-                    console.error("[WS:Tables] 🚨 인증 실패(4001)로 인해 재연결을 시도하지 않습니다.");
+                    console.error("[WS:Tables] 🚨 인증 실패(4001)로 인해 재연결을 시도하지 않습니다. (쿠키 만료 등)");
                 }
             };
 
             socket.onerror = (error) => {
-                console.error("[WS:Tables] 🔴 소켓 에러 발생! (1006인 경우 Nginx 설정이나 토큰 문제일 확률 높음):", error);
+                console.error("[WS:Tables] 🔴 소켓 에러 발생!:", error);
             };
         };
 
@@ -104,7 +99,7 @@ export const useTablesWS = (options: UseTablesWSOptions = {}) => {
                 wsRef.current = null;
             }
         };
-    }, []); // 의존성 배열 비움 (마운트 시 1회 연결)
+    }, []); 
 
     return { socket: wsRef.current };
 };
