@@ -1,6 +1,7 @@
 // tableView/_ws/useTablesWS.ts
 import { useEffect, useRef } from "react";
 import { TableWSPayload } from "./types";
+import { getWsUrl } from "@utils/getWsUrl";
 
 interface UseTablesWSOptions {
     onConnectionEstablished?: (data: any) => void;
@@ -11,11 +12,6 @@ interface UseTablesWSOptions {
     onError?: (data: any) => void;
 }
 
-// 🚨 [핵심 수정] Vite 개발 환경에서는 프록시를 타기 위해 현재 host를 사용하고, 빌드(운영) 환경에서는 환경 변수를 사용합니다.
-const WS_BASE_URL = import.meta.env.DEV
-  ? `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}`
-  : (import.meta.env.VITE_BASE_URL || "").replace(/^http/, "ws").replace(/\/$/, "");
-
 export const useTablesWS = (options: UseTablesWSOptions = {}) => {
     const wsRef = useRef<WebSocket | null>(null);
     const reconnectTimeoutRef = useRef<number | null>(null);
@@ -24,8 +20,7 @@ export const useTablesWS = (options: UseTablesWSOptions = {}) => {
         let isMounted = true;
 
         const connect = () => {
-            // URL 설정 (개발 환경 프록시를 통해 쿠키가 자동으로 전송됩니다.)
-            const wsUrl = `${WS_BASE_URL}/ws/django/booth/tables/`;
+            const wsUrl = getWsUrl('/ws/django/booth/tables/');
             
             console.log(`[WS:Tables] 🔄 연결 시도 중... URL: ${wsUrl}`);
 
