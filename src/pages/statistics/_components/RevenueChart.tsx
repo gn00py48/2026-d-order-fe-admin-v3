@@ -15,7 +15,7 @@ const RevenueChart = ({ data, formatRevenue }: RevenueChartProps) => {
 
   return (
     <S.ChartScroller>
-      <S.ChartGrid>
+      <S.ChartGrid $columnCount={data.length}>
         {data.map((item) => {
           const height = maxRevenue > 0 ? (item.revenue / maxRevenue) * 100 : 0;
 
