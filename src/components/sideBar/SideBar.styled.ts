@@ -36,8 +36,8 @@ export const NavWrapper = styled.div`
   flex-direction: column;
   justify-content: space-between;
 
-  margin-top: 32px;
-  margin-bottom: 32px;
+  margin-top: 24px;
+  margin-bottom: 24px;
 `;
 
 export const NavItem = styled.button`

@@ -105,6 +105,13 @@ const SideBar = () => {
             alt="coupon"
           />
           <NavItem
+            icon={IMAGE_CONSTANTS.NAV_DASHBOARD}
+            activeIcon={IMAGE_CONSTANTS.NAV_DASHBOARD_ACTIVE}
+            isActive={activeNav === ROUTE_PATHS.STATISTICS}
+            onClick={() => handleNavClick(ROUTE_PATHS.STATISTICS)}
+            alt="statistics"
+          />
+          <NavItem
             icon={IMAGE_CONSTANTS.NAV_MY}
             activeIcon={IMAGE_CONSTANTS.NAV_MY_ACTIVE}
             isActive={activeNav === ROUTE_PATHS.MYPAGE}
