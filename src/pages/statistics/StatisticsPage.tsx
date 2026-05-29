@@ -248,28 +248,6 @@ const StatisticsPage = () => {
               ))}
             </S.RankingGrid>
           </S.Section>
-
-          <S.Section>
-            <S.Description>
-
-              </S.Description>
-            <S.SectionHeader>
-              <S.SectionTitle>메뉴 데이터</S.SectionTitle>
-            </S.SectionHeader>
-            <S.RankingGrid>
-              {rankingItems.map((ranking) => (
-                <MenuRankingSection
-                  key={`data-${ranking.title}`}
-                  index={ranking.index}
-                  title={ranking.title}
-                  items={ranking.items}
-                  formatRevenue={formatRevenue}
-                  formatCount={formatCount}
-                  formatMinutes={formatMinutes}
-                />
-              ))}
-            </S.RankingGrid>
-          </S.Section>
           </S.DashboardContainer>
         </S.DashboardShell>
       </S.StatisticsPageWrapper>
